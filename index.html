@@ -1,0 +1,2351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chem Lab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    }
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto !important;
+    }
+    
+    body {
+      min-height: 100vh;
+      transition: background 0.5s ease;
+      overflow-y: auto !important;
+    }
+    
+    /* Main Page Theme - Dark blue and dark purple gradient */
+    body.theme-main {
+      background: linear-gradient(135deg, #0a1a2f 0%, #1a0f2f 100%);
+      background-attachment: fixed;
+    }
+    
+    /* Periodic Table Theme - Dark blue with lime green square sparks */
+    body.theme-periodic {
+      background: #0a1927;
+      position: relative;
+    }
+    
+    .periodic-spark {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      background: #32cd32;
+      opacity: 0.5;
+      pointer-events: none;
+      animation: floatUpSquare linear infinite;
+      z-index: 0;
+      bottom: -20px;
+      border-radius: 3px;
+      box-shadow: 0 0 20px #32cd32, 0 0 40px #32cd32;
+    }
+    
+    /* Lab Theme - White background with light-colored square sparks */
+    body.theme-lab {
+      background: #f0f0f0;
+      position: relative;
+    }
+    
+    .lab-spark {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      pointer-events: none;
+      animation: floatUpSquare linear infinite;
+      z-index: 0;
+      box-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+      bottom: -20px;
+      opacity: 0.7;
+    }
+    
+    /* Additional Themes */
+    body.theme-midnight {
+      background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      background-attachment: fixed;
+    }
+    
+    body.theme-ember {
+      background: linear-gradient(135deg, #ff6b6b 0%, #feca57 50%, #ff9f43 100%);
+      background-attachment: fixed;
+    }
+    
+    body.theme-aurora {
+      background: linear-gradient(135deg, #1a512e 0%, #3b8d5e 50%, #9fd9b2 100%);
+      background-attachment: fixed;
+    }
+    
+    body.theme-twilight {
+      background: linear-gradient(135deg, #614385 0%, #516395 100%);
+      background-attachment: fixed;
+    }
+    
+    body.theme-candy {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 50%, #fad0c4 100%);
+      background-attachment: fixed;
+    }
+    
+    body.theme-oceanic {
+      background: linear-gradient(135deg, #0b3b5c 0%, #1b5a7a 50%, #2b7a9a 100%);
+      background-attachment: fixed;
+    }
+    
+    body.theme-forest {
+      background: linear-gradient(135deg, #134e5e 0%, #2b7a4b 100%);
+      background-attachment: fixed;
+    }
+    
+    body.theme-sunset {
+      background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%);
+      background-attachment: fixed;
+    }
+    
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-120vh) scale(0.2);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes floatUpSquare {
+      0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(-120vh) scale(0.2) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    /* Theme button */
+    #theme-btn {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 1000;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background-color: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      transition: all 200ms;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      font-size: 1.2rem;
+    }
+    
+    #theme-btn:hover {
+      transform: scale(1.1);
+      background-color: rgba(255,255,255,0.3);
+    }
+    
+    /* Theme selector panel */
+    #theme-screen {
+      position: fixed;
+      top: 0;
+      right: -400px;
+      width: 350px;
+      height: 100vh;
+      background-color: rgba(31, 41, 55, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 2000;
+      transition: right 0.3s ease-out;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+      overflow-y: auto;
+      color: white;
+    }
+    
+    #theme-screen.open { right: 0; }
+    #theme-screen.hidden { display: block !important; right: -400px; }
+    
+    .theme-modal { padding: 1.5rem; }
+    
+    .theme-modal h2 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+    }
+    
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+    
+    .theme-option {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      text-align: center;
+      font-weight: 500;
+      transition: all 200ms;
+      border: 2px solid transparent;
+      color: white;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    
+    .theme-option:hover {
+      transform: scale(1.05);
+      border-color: #fbbf24;
+    }
+    
+    .theme-option.active {
+      border-color: #fbbf24;
+      box-shadow: 0 0 15px #fbbf24;
+    }
+    
+    .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background-color: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 200ms;
+    }
+    
+    .close-btn:hover {
+      background-color: rgba(255,255,255,0.3);
+      transform: scale(1.1);
+    }
+    
+    /* Screen navigation */
+    .screen {
+      min-height: 100vh;
+      padding: 2rem;
+      display: none;
+      position: relative;
+      z-index: 1;
+      overflow-y: auto !important;
+      overflow-x: hidden;
+    }
+    
+    .screen.active {
+      display: block;
+    }
+    
+    /* Main menu */
+    .main-menu {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+    }
+    
+    .main-title {
+      font-size: 5rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      letter-spacing: 4px;
+    }
+    
+    .main-title .chem {
+      color: #4ade80;
+    }
+    
+    .main-title .lab {
+      color: #60a5fa;
+    }
+    
+    .menu-buttons {
+      display: flex;
+      gap: 2rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .menu-btn {
+      padding: 1rem 3rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border: 2px solid rgba(255,255,255,0.2);
+      color: white;
+      min-width: 220px;
+      justify-content: center;
+    }
+    
+    .menu-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    }
+    
+    .btn-periodic {
+      background: linear-gradient(145deg, #1e3a5f, #0a1927);
+    }
+    
+    .btn-lab {
+      background: linear-gradient(145deg, #4b5563, #1f2937);
+    }
+    
+    .btn-quiz {
+      background: linear-gradient(145deg, #614385, #516395);
+    }
+    
+    /* Back button - now just a back arrow */
+    .back-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+      transition: all 200ms;
+      width: fit-content;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .back-btn:hover {
+      transform: translateX(-5px);
+      opacity: 0.8;
+    }
+    
+    /* Periodic table styles */
+    .periodic-wrapper {
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      background: #102b3f;
+      border-radius: 30px;
+      padding: 20px 15px 25px 15px;
+      box-shadow: 0 20px 35px rgba(0,0,0,0.7);
+      position: relative;
+      z-index: 2;
+    }
+    
+    .periodic-wrapper h1 {
+      text-align: center;
+      margin: 0 0 5px 0;
+      color: #ffffff;
+      font-weight: 400;
+      font-size: 2.5rem;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 5px #000;
+    }
+    
+    .periodic-subtitle {
+      text-align: center;
+      color: #aaccff;
+      margin-bottom: 20px;
+      font-style: italic;
+      border-bottom: 1px solid #2e4b65;
+      padding-bottom: 10px;
+    }
+    
+    .periodic-grid {
+      display: grid;
+      grid-template-columns: repeat(18, minmax(65px, 1fr));
+      gap: 4px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+    
+    .element {
+      border-radius: 8px;
+      padding: 6px 2px 3px 2px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #0a1a24, 0 3px 8px black;
+      transition: 0.1s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: white;
+      font-weight: 500;
+      min-height: 75px;
+    }
+    
+    .element:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 0 #0a1a24, 0 6px 12px black;
+      filter: brightness(1.15);
+      border-color: #ffd966;
+    }
+    
+    .element.selected {
+      border: 3px solid #fbbf24;
+      box-shadow: 0 3px 0 #a57c1a, 0 0 0 2px #ffe28c;
+    }
+    
+    .element.dimmed {
+      opacity: 0.2;
+      filter: grayscale(0.8);
+      transition: all 300ms;
+    }
+    
+    .atomic {
+      font-size: 0.65rem;
+      color: #e0e7ff;
+      font-weight: 400;
+    }
+    
+    .symbol {
+      font-size: 1.3rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    
+    .ename {
+      font-size: 0.5rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      color: #f0f4fa;
+    }
+    
+    .empty {
+      background: transparent;
+      border: 1px dashed #2a4a60;
+      box-shadow: none;
+      color: #5c7992;
+      cursor: default;
+      pointer-events: none;
+      min-height: 75px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+    }
+    
+    /* Group colors */
+    .alkali-metal { background: #d13d3d; }        /* Red */
+    .alkaline-earth { background: #d47b3d; }      /* Orange */
+    .transition { background: #c08b4b; }           /* Bronze */
+    .lanthanide { background: #b37bb3; }           /* Purple */
+    .actinide { background: #b35e8e; }              /* Pinkish */
+    .post-transition { background: #5f9ea0; }       /* Cadet Blue */
+    .metalloid { background: #8ea852; }             /* Olive */
+    .nonmetal { background: #5da46b; }               /* Green */
+    .noble-gas { background: #5f7da3; }                /* Slate Blue */
+    .hydrogen-special { background: #5da46b; }          /* Green */
+    .unknown { background: #808080; }                      /* Gray */
+    
+    /* Category filter buttons */
+    .category-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+    
+    .category-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 200ms;
+      color: white;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .category-btn:hover {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
+    
+    .category-btn.active {
+      border: 2px solid #fbbf24;
+      box-shadow: 0 0 10px #fbbf24;
+    }
+    
+    .category-btn.reset-btn {
+      background: #6b7280;
+    }
+    
+    .info-panel {
+      background: #0d2a40e0;
+      backdrop-filter: blur(5px);
+      border-radius: 50px 50px 25px 25px;
+      padding: 20px 30px;
+      color: #f0f8ff;
+      margin-top: 20px;
+    }
+    
+    .info-content {
+      font-size: 1rem;
+      line-height: 1.5;
+      background: #143650;
+      padding: 20px 25px;
+      border-radius: 40px 20px 20px 40px;
+    }
+    
+    .element-data {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px 15px;
+      margin: 10px 0;
+      color: #000000;
+    }
+    
+    .data-label {
+      font-weight: 600;
+      color: #000000;
+    }
+    
+    .data-value {
+      color: #000000;
+    }
+    
+    .discovery-info {
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px dashed #3c79a2;
+      color: #000000;
+    }
+    
+    .common-uses {
+      margin-top: 15px;
+      padding: 10px 0;
+    }
+    
+    .common-uses .data-label {
+      font-size: 1.1rem;
+      color: #000000;
+    }
+    
+    .common-uses p {
+      color: #000000;
+      margin-top: 4px;
+      margin-left: 0;
+    }
+    
+    /* Element modal */
+    #element-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+    }
+    
+    #element-modal.hidden {
+      display: none;
+    }
+    
+    .modal-content {
+      background: white;
+      color: black;
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    
+    .modal-content h3 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      color: #1f2937;
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 200ms;
+    }
+    
+    .modal-close:hover {
+      background: #d1d5db;
+      transform: scale(1.1);
+    }
+    
+    /* Lab styles */
+    .lab-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+      padding-bottom: 2rem;
+    }
+    
+    .lab-container h2 {
+      color: #333;
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    body.theme-lab .lab-container h2 {
+      color: #333;
+    }
+    
+    .glass-effect {
+      background-color: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 1.5rem;
+    }
+    
+    body.theme-lab .glass-effect {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .glass-effect h3 {
+      color: white;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    
+    body.theme-lab .glass-effect h3 {
+      color: #333;
+    }
+    
+    .chemicals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 0.75rem;
+    }
+    
+    .chemical-item {
+      background: linear-gradient(145deg, #4b5563, #374151);
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      text-align: center;
+      cursor: move;
+      transition: all 200ms;
+      color: white;
+      font-weight: 500;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .chemical-item:hover {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
+    
+    .beaker-area {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    
+    .beaker {
+      width: 180px;
+      height: 240px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 0 0 2rem 2rem;
+      border: 3px solid #60a5fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .beaker-label {
+      position: absolute;
+      top: 0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: bold;
+      color: white;
+      font-size: 1.2rem;
+    }
+    
+    .beaker-content {
+      width: 100%;
+      transition: height 0.3s ease;
+      position: relative;
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .reaction-log {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      min-height: 100px;
+      max-height: 150px;
+      overflow-y: auto;
+      color: white;
+      font-size: 0.9rem;
+    }
+    
+    body.theme-lab .reaction-log {
+      color: #333;
+      background: rgba(0, 0, 0, 0.05);
+    }
+    
+    .log-entry {
+      padding: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    .clear-btn {
+      padding: 0.5rem 1rem;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 200ms;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .clear-btn:hover {
+      background: #b91c1c;
+      transform: scale(1.05);
+    }
+    
+    .guide-card {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .guide-card h4 {
+      color: #fbbf24;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    .guide-card p {
+      color: white;
+      font-size: 0.9rem;
+    }
+    
+    body.theme-lab .guide-card p {
+      color: #333;
+    }
+    
+    .guide-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .guide-icon {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    
+    /* Quiz styles */
+    .quiz-container {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+      padding-bottom: 2rem;
+    }
+    
+    .quiz-container h2 {
+      color: white;
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    body.theme-twilight .quiz-container h2 {
+      color: white;
+    }
+    
+    .quiz-card {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .question-text {
+      font-size: 1.3rem;
+      color: white;
+      margin-bottom: 1.5rem;
+    }
+    
+    .options-grid {
+      display: grid;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    
+    .option-btn {
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 0.75rem;
+      color: white;
+      cursor: pointer;
+      transition: all 200ms;
+      text-align: left;
+      font-size: 1rem;
+    }
+    
+    .option-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateX(5px);
+    }
+    
+    .option-btn.correct {
+      background: #10b981;
+      border-color: #059669;
+      color: white;
+    }
+    
+    .option-btn.wrong {
+      background: #ef4444;
+      border-color: #b91c1c;
+      color: white;
+    }
+    
+    .quiz-result {
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.2rem;
+      color: white;
+      font-weight: bold;
+    }
+    
+    .quiz-controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+    
+    .quiz-btn {
+      padding: 0.75rem 2rem;
+      background: #8b5cf6;
+      border: none;
+      border-radius: 0.5rem;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 200ms;
+    }
+    
+    .quiz-btn:hover {
+      background: #7c3aed;
+      transform: scale(1.05);
+    }
+    
+    .quiz-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .score-display {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body class="theme-main" id="body">
+  <!-- Theme Button -->
+  <button id="theme-btn">
+    <i class="fa fa-paint-brush"></i>
+  </button>
+
+  <!-- Theme Selector Panel -->
+  <div id="theme-screen" class="hidden">
+    <div class="theme-modal">
+      <div class="flex justify-between items-center mb-6">
+        <h2>Choose Theme</h2>
+        <div class="close-btn" id="theme-close-btn">
+          <i class="fa fa-times"></i>
+        </div>
+      </div>
+      <div class="theme-grid">
+        <div class="theme-option bg-gradient-to-br from-[#0a1a2f] to-[#1a0f2f]" data-theme="main">Main (Default)</div>
+        <div class="theme-option bg-[#0a1927]" data-theme="periodic">Periodic</div>
+        <div class="theme-option bg-[#f0f0f0] text-gray-800" data-theme="lab">Lab</div>
+        <div class="theme-option bg-gradient-to-br from-[#614385] to-[#516395]" data-theme="twilight">Twilight (Quiz)</div>
+        <div class="theme-option bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364]" data-theme="midnight">Midnight</div>
+        <div class="theme-option bg-gradient-to-br from-[#ff6b6b] via-[#feca57] to-[#ff9f43]" data-theme="ember">Ember</div>
+        <div class="theme-option bg-gradient-to-br from-[#1a512e] via-[#3b8d5e] to-[#9fd9b2]" data-theme="aurora">Aurora</div>
+        <div class="theme-option bg-gradient-to-br from-[#ff9a9e] via-[#fad0c4] to-[#fad0c4]" data-theme="candy">Candy</div>
+        <div class="theme-option bg-gradient-to-br from-[#0b3b5c] via-[#1b5a7a] to-[#2b7a9a]" data-theme="oceanic">Oceanic</div>
+        <div class="theme-option bg-gradient-to-br from-[#134e5e] to-[#2b7a4b]" data-theme="forest">Forest</div>
+        <div class="theme-option bg-gradient-to-br from-[#ff512f] to-[#dd2476]" data-theme="sunset">Sunset</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Menu Screen -->
+  <div id="main-screen" class="screen active">
+    <div class="main-menu">
+      <h1 class="main-title">
+        <span class="chem">Chem</span> <span class="lab">Lab</span>
+      </h1>
+      <div class="menu-buttons">
+        <button id="periodic-btn" class="menu-btn btn-periodic">
+          <i class="fa fa-table"></i> Periodic Table
+        </button>
+        <button id="lab-btn" class="menu-btn btn-lab">
+          <i class="fa fa-flask"></i> Virtual Lab
+        </button>
+        <button id="quiz-btn" class="menu-btn btn-quiz">
+          <i class="fa fa-question-circle"></i> Quiz
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Periodic Table Screen -->
+  <div id="periodic-screen" class="screen">
+    <button class="back-btn" id="periodic-back">
+      <i class="fa fa-arrow-left"></i>
+    </button>
+    <div class="periodic-wrapper">
+      <h1>⚛️ PERIODIC TABLE</h1>
+      <div class="periodic-subtitle">click any tile — see detailed element data</div>
+
+      <div class="periodic-grid" id="periodicGrid"></div>
+
+      <div class="category-filters">
+        <button class="category-btn reset-btn" data-category="reset">Show All</button>
+        <button class="category-btn" style="background: #d13d3d;" data-category="alkali-metal">Alkali Metals</button>
+        <button class="category-btn" style="background: #d47b3d;" data-category="alkaline-earth">Alkaline Earth</button>
+        <button class="category-btn" style="background: #c08b4b;" data-category="transition">Transition Metals</button>
+        <button class="category-btn" style="background: #5f9ea0;" data-category="post-transition">Post-Transition</button>
+        <button class="category-btn" style="background: #8ea852;" data-category="metalloid">Metalloids</button>
+        <button class="category-btn" style="background: #5da46b;" data-category="nonmetal">Nonmetals</button>
+        <button class="category-btn" style="background: #5f7da3;" data-category="noble-gas">Noble Gases</button>
+        <button class="category-btn" style="background: #b37bb3;" data-category="lanthanide">Lanthanides</button>
+        <button class="category-btn" style="background: #b35e8e;" data-category="actinide">Actinides</button>
+        <button class="category-btn" style="background: #808080;" data-category="unknown">Unknown</button>
+      </div>
+
+      <div class="info-panel" id="infoPanel">
+        <div class="info-content" id="elementDescription"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Virtual Lab Screen -->
+  <div id="lab-screen" class="screen">
+    <button class="back-btn" id="lab-back">
+      <i class="fa fa-arrow-left"></i>
+    </button>
+    
+    <div class="lab-container">
+      <h2>Virtual Lab</h2>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <!-- Chemicals Panel -->
+        <div class="lg:col-span-1">
+          <div class="glass-effect mb-4">
+            <h3><i class="fa fa-flask mr-2"></i>Chemicals</h3>
+            <div class="chemicals-grid">
+              <div class="chemical-item" draggable="true" data-chemical="hcl">🧪 Hydrochloric Acid (HCl)</div>
+              <div class="chemical-item" draggable="true" data-chemical="naoh">⚗️ Sodium Hydroxide (NaOH)</div>
+              <div class="chemical-item" draggable="true" data-chemical="h2so4">☣️ Sulfuric Acid (H₂SO₄)</div>
+              <div class="chemical-item" draggable="true" data-chemical="nh3">💨 Ammonia (NH₃)</div>
+              <div class="chemical-item" draggable="true" data-chemical="caco3">🪨 Calcium Carbonate (CaCO₃)</div>
+              <div class="chemical-item" draggable="true" data-chemical="cuso4">🔵 Copper Sulfate (CuSO₄)</div>
+              <div class="chemical-item" draggable="true" data-chemical="fecl3">🟤 Iron(III) Chloride (FeCl₃)</div>
+              <div class="chemical-item" draggable="true" data-chemical="agno3">✨ Silver Nitrate (AgNO₃)</div>
+              <div class="chemical-item" draggable="true" data-chemical="nacl">🧂 Sodium Chloride (NaCl)</div>
+              <div class="chemical-item" draggable="true" data-chemical="ki">🧪 Potassium Iodide (KI)</div>
+              <div class="chemical-item" draggable="true" data-chemical="kmno4">🟣 Potassium Permanganate (KMnO₄)</div>
+              <div class="chemical-item" draggable="true" data-chemical="na2co3">🧪 Sodium Carbonate (Na₂CO₃)</div>
+              <div class="chemical-item" draggable="true" data-chemical="mg">🔥 Magnesium (Mg)</div>
+              <div class="chemical-item" draggable="true" data-chemical="zn">⚡ Zinc (Zn)</div>
+              <div class="chemical-item" draggable="true" data-chemical="al">📦 Aluminum (Al)</div>
+              <div class="chemical-item" draggable="true" data-chemical="pb">⚖️ Lead (Pb)</div>
+            </div>
+          </div>
+          
+          <!-- Lab Guide -->
+          <div class="glass-effect">
+            <h3><i class="fa fa-book mr-2"></i>Lab Guide</h3>
+            <div class="guide-card">
+              <h4>📋 How to Use</h4>
+              <p>Drag chemicals from the list into the beakers. Combine them to see reactions!</p>
+            </div>
+            <div class="guide-card">
+              <h4>🧪 Acid-Base Reactions</h4>
+              <div class="guide-item">
+                <div class="guide-icon">🧪+⚗️</div>
+                <div>HCl + NaOH → Neutralization (salt water)</div>
+              </div>
+              <div class="guide-item">
+                <div class="guide-icon">☣️+⚗️</div>
+                <div>H₂SO₄ + NaOH → Neutralization</div>
+              </div>
+              <div class="guide-item">
+                <div class="guide-icon">🧪+🧪</div>
+                <div>HCl + Na₂CO₃ → CO₂ bubbles!</div>
+              </div>
+              <div class="guide-item">
+                <div class="guide-icon">☣️+🧪</div>
+                <div>H₂SO₄ + Na₂CO₃ → CO₂ bubbles!</div>
+              </div>
+            </div>
+            <div class="guide-card">
+              <h4>🔵 Precipitation Reactions</h4>
+              <div class="guide-item">
+                <div class="guide-icon">🔵+⚗️</div>
+                <div>CuSO₄ + NaOH → Blue precipitate</div>
+              </div>
+              <div class="guide-item">
+                <div class="guide-icon">🟤+⚗️</div>
+                <div>FeCl₃ + NaOH → Brown precipitate</div>
+              </div>
+              <div class="guide-item">
+                <div class="guide-icon">✨+🧪</div>
+                <div>AgNO₃ + NaCl → White precipitate</div>
+              </div>
+              <div class="guide-item">
+                <div class="guide-icon">✨+🧪</div>
+                <div>AgNO₃ + KI → Yellow precipitate</div>
+              </div>
+              <div class="guide-item">
+                <div class="guide-icon">🟣+🧪</div>
+                <div>KMnO₄ + NaOH → Green then brown</div>
+              </div>
+            </div>
+            <div class="guide-card">
+              <h4>⚡ Metal Reactions</h4>
+              <div class="guide-item">
+                <div class="guide-icon">🔥+🧪</div>
+                <div>Mg + HCl → Hydrogen bubbles!</div>
+              </div>
+              <div class="guide-item">
+                <div class="guide-icon">⚡+🧪</div>
+                <div>Zn + HCl → Hydrogen bubbles</div>
+              </div>
+              <div class="guide-item">
+                <div class="guide-icon">📦+🧪</div>
+                <div>Al + HCl → Slow hydrogen</div>
+              </div>
+              <div class="guide-item">
+                <div class="guide-icon">⚖️+🧪</div>
+                <div>Pb + HCl → Very slow reaction</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Beakers Panel -->
+        <div class="lg:col-span-3">
+          <div class="glass-effect mb-4">
+            <div class="flex justify-between items-center mb-3">
+              <h3><i class="fa fa-beaker mr-2"></i>Beakers</h3>
+              <button id="clear-beakers" class="clear-btn">
+                <i class="fa fa-trash"></i> Clear All
+              </button>
+            </div>
+            <div class="beaker-area">
+              <div class="beaker" data-beaker="1">
+                <span class="beaker-label">A</span>
+                <div class="beaker-content" id="beaker1-content"></div>
+              </div>
+              <div class="beaker" data-beaker="2">
+                <span class="beaker-label">B</span>
+                <div class="beaker-content" id="beaker2-content"></div>
+              </div>
+              <div class="beaker" data-beaker="3">
+                <span class="beaker-label">C</span>
+                <div class="beaker-content" id="beaker3-content"></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Reaction Log -->
+          <div class="glass-effect">
+            <h3><i class="fa fa-list mr-2"></i>Reaction Log</h3>
+            <div class="reaction-log" id="reaction-log">
+              <div class="log-entry">Ready for experiments... Drag chemicals into beakers!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Screen -->
+  <div id="quiz-screen" class="screen">
+    <button class="back-btn" id="quiz-back">
+      <i class="fa fa-arrow-left"></i>
+    </button>
+    
+    <div class="quiz-container">
+      <h2>Chemistry Quiz</h2>
+      
+      <div class="quiz-card">
+        <div class="question-text" id="question-text">Loading question...</div>
+        
+        <div class="options-grid" id="options-container"></div>
+        
+        <div class="quiz-result" id="quiz-result"></div>
+        
+        <div class="score-display" id="score-display">Score: 0 / 10</div>
+        
+        <div class="quiz-controls">
+          <button class="quiz-btn" id="next-question" disabled>Next Question</button>
+          <button class="quiz-btn" id="restart-quiz">Restart Quiz</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Element Details Modal -->
+  <div id="element-modal" class="hidden">
+    <div class="modal-content">
+      <div class="modal-close" id="close-modal">
+        <i class="fa fa-times"></i>
+      </div>
+      <h3 id="modal-title"></h3>
+      <div id="modal-content" class="space-y-3"></div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ========== COMPLETE PERIODIC TABLE DATA (1-118) ==========
+      const elements = [
+        // Period 1
+        {atomic:1, symbol:'H', name:'Hydrogen', group:'hydrogen-special', row:0, col:0,
+         mass:'1.008 u', density:'0.07099 g/cm³ (at 0°C)', melt:'-259.14 °C', boil:'-252.87 °C',
+         discoverers:'Henry Cavendish', year:'1766', uses:'Ammonia production, rocket fuel, clean energy carrier'},
+        {atomic:2, symbol:'He', name:'Helium', group:'noble-gas', row:0, col:17,
+         mass:'4.002602 u', density:'0.1785 g/cm³ (at 0°C)', melt:'-272.20 °C', boil:'-268.93 °C',
+         discoverers:'Pierre Janssen, Norman Lockyer', year:'1868', uses:'Balloons, cooling MRI magnets, deep-sea diving'},
+        
+        // Period 2
+        {atomic:3, symbol:'Li', name:'Lithium', group:'alkali-metal', row:1, col:0,
+         mass:'6.94 u', density:'0.534 g/cm³', melt:'180.5 °C', boil:'1330 °C',
+         discoverers:'Johan August Arfwedson', year:'1817', uses:'Rechargeable batteries, mood-stabilizing drugs, ceramics'},
+        {atomic:4, symbol:'Be', name:'Beryllium', group:'alkaline-earth', row:1, col:1,
+         mass:'9.0121831 u', density:'1.85 g/cm³', melt:'1287 °C', boil:'2469 °C',
+         discoverers:'Louis-Nicolas Vauquelin', year:'1798', uses:'Aerospace structures, X-ray windows, nuclear reactors'},
+        {atomic:5, symbol:'B', name:'Boron', group:'metalloid', row:1, col:12,
+         mass:'10.81 u', density:'2.34 g/cm³', melt:'2076 °C', boil:'3927 °C',
+         discoverers:'Joseph Louis Gay-Lussac, Louis Jacques Thénard', year:'1808', uses:'Heat-resistant glass, semiconductors, nuclear reactors'},
+        {atomic:6, symbol:'C', name:'Carbon', group:'nonmetal', row:1, col:13,
+         mass:'12.011 u', density:'2.267 g/cm³ (graphite)', melt:'3550 °C (sublimes)', boil:'3825 °C (sublimes)',
+         discoverers:'Ancient', year:'Ancient', uses:'Fuels, steelmaking, structural materials, diamonds'},
+        {atomic:7, symbol:'N', name:'Nitrogen', group:'nonmetal', row:1, col:14,
+         mass:'14.007 u', density:'1.251 g/L (at 0°C)', melt:'-210.1 °C', boil:'-195.79 °C',
+         discoverers:'Daniel Rutherford', year:'1772', uses:'Food preservation, fertilizers, cryotherapy'},
+        {atomic:8, symbol:'O', name:'Oxygen', group:'nonmetal', row:1, col:15,
+         mass:'15.999 u', density:'1.429 g/L (at 0°C)', melt:'-218.3 °C', boil:'-182.9 °C',
+         discoverers:'Carl Wilhelm Scheele, Joseph Priestley', year:'1774', uses:'Steel manufacturing, water treatment, rocket oxidizer'},
+        {atomic:9, symbol:'F', name:'Fluorine', group:'nonmetal', row:1, col:16,
+         mass:'18.99840316 u', density:'1.696 g/L (at 0°C)', melt:'-219.67 °C', boil:'-188.11 °C',
+         discoverers:'Henri Moissan', year:'1886', uses:'Toothpaste, Teflon, uranium refining'},
+        {atomic:10, symbol:'Ne', name:'Neon', group:'noble-gas', row:1, col:17,
+         mass:'20.1797 u', density:'0.9002 g/L (at 0°C)', melt:'-248.59 °C', boil:'-246.08 °C',
+         discoverers:'William Ramsay, Morris Travers', year:'1898', uses:'Neon signs, high-voltage indicators, lasers'},
+        
+        // Period 3
+        {atomic:11, symbol:'Na', name:'Sodium', group:'alkali-metal', row:2, col:0,
+         mass:'22.98976928 u', density:'0.968 g/cm³', melt:'97.72 °C', boil:'883 °C',
+         discoverers:'Humphry Davy', year:'1807', uses:'Table salt, street lights, nuclear reactor coolant'},
+        {atomic:12, symbol:'Mg', name:'Magnesium', group:'alkaline-earth', row:2, col:1,
+         mass:'24.305 u', density:'1.738 g/cm³', melt:'650 °C', boil:'1090 °C',
+         discoverers:'Humphry Davy', year:'1808', uses:'Aircraft alloys, flares, chlorophyll'},
+        {atomic:13, symbol:'Al', name:'Aluminium', group:'post-transition', row:2, col:12,
+         mass:'26.9815385 u', density:'2.70 g/cm³', melt:'660.32 °C', boil:'2470 °C',
+         discoverers:'Hans Christian Ørsted', year:'1825', uses:'Cans, foil, airplanes, construction'},
+        {atomic:14, symbol:'Si', name:'Silicon', group:'metalloid', row:2, col:13,
+         mass:'28.0855 u', density:'2.329 g/cm³', melt:'1414 °C', boil:'3265 °C',
+         discoverers:'Jöns Jacob Berzelius', year:'1824', uses:'Computer chips, solar cells, glass'},
+        {atomic:15, symbol:'P', name:'Phosphorus', group:'nonmetal', row:2, col:14,
+         mass:'30.973761998 u', density:'1.823 g/cm³ (white)', melt:'44.15 °C', boil:'280.5 °C',
+         discoverers:'Hennig Brand', year:'1669', uses:'Fertilizers, detergents, matches'},
+        {atomic:16, symbol:'S', name:'Sulfur', group:'nonmetal', row:2, col:15,
+         mass:'32.06 u', density:'2.07 g/cm³', melt:'115.21 °C', boil:'444.6 °C',
+         discoverers:'Ancient', year:'Ancient', uses:'Vulcanizing rubber, fungicides, sulfuric acid'},
+        {atomic:17, symbol:'Cl', name:'Chlorine', group:'nonmetal', row:2, col:16,
+         mass:'35.45 u', density:'3.2 g/L (at 0°C)', melt:'-101.5 °C', boil:'-34.04 °C',
+         discoverers:'Carl Wilhelm Scheele', year:'1774', uses:'Water disinfection, bleach, PVC plastics'},
+        {atomic:18, symbol:'Ar', name:'Argon', group:'noble-gas', row:2, col:17,
+         mass:'39.948 u', density:'1.784 g/L (at 0°C)', melt:'-189.34 °C', boil:'-185.85 °C',
+         discoverers:'Lord Rayleigh, William Ramsay', year:'1894', uses:'Light bulbs, welding shielding gas, double-pane windows'},
+        
+        // Period 4
+        {atomic:19, symbol:'K', name:'Potassium', group:'alkali-metal', row:3, col:0,
+         mass:'39.0983 u', density:'0.862 g/cm³', melt:'63.5 °C', boil:'759 °C',
+         discoverers:'Humphry Davy', year:'1807', uses:'Fertilizers, nerve signals, electrolyte'},
+        {atomic:20, symbol:'Ca', name:'Calcium', group:'alkaline-earth', row:3, col:1,
+         mass:'40.078 u', density:'1.55 g/cm³', melt:'842 °C', boil:'1484 °C',
+         discoverers:'Humphry Davy', year:'1808', uses:'Bones and teeth, cement, metal extraction'},
+        {atomic:21, symbol:'Sc', name:'Scandium', group:'transition', row:3, col:2,
+         mass:'44.955908 u', density:'2.985 g/cm³', melt:'1541 °C', boil:'2836 °C',
+         discoverers:'Lars Fredrik Nilson', year:'1879', uses:'Aluminium alloys for aerospace, sports equipment'},
+        {atomic:22, symbol:'Ti', name:'Titanium', group:'transition', row:3, col:3,
+         mass:'47.867 u', density:'4.506 g/cm³', melt:'1668 °C', boil:'3287 °C',
+         discoverers:'William Gregor', year:'1791', uses:'Aircraft, medical implants, white pigment'},
+        {atomic:23, symbol:'V', name:'Vanadium', group:'transition', row:3, col:4,
+         mass:'50.9415 u', density:'6.11 g/cm³', melt:'1910 °C', boil:'3407 °C',
+         discoverers:'Andrés Manuel del Río', year:'1801', uses:'Steel tools, redox batteries'},
+        {atomic:24, symbol:'Cr', name:'Chromium', group:'transition', row:3, col:5,
+         mass:'51.9961 u', density:'7.19 g/cm³', melt:'1907 °C', boil:'2671 °C',
+         discoverers:'Louis-Nicolas Vauquelin', year:'1797', uses:'Stainless steel, chrome plating, rubies'},
+        {atomic:25, symbol:'Mn', name:'Manganese', group:'transition', row:3, col:6,
+         mass:'54.938044 u', density:'5.95 g/cm³ (liquid at melting point)', melt:'1246 °C', boil:'2061 °C',
+         discoverers:'Carl Wilhelm Scheele, Johan Gottlieb Gahn, Ignatius Gottfried Kaim', year:'1774', uses:'Steelmaking, batteries, glass coloring'},
+        {atomic:26, symbol:'Fe', name:'Iron', group:'transition', row:3, col:7,
+         mass:'55.845 u', density:'7.874 g/cm³', melt:'1538 °C', boil:'2861 °C',
+         discoverers:'Ancient', year:'Ancient', uses:'Steel, tools, machinery, hemoglobin'},
+        {atomic:27, symbol:'Co', name:'Cobalt', group:'transition', row:3, col:8,
+         mass:'58.933194 u', density:'8.90 g/cm³', melt:'1495 °C', boil:'2927 °C',
+         discoverers:'Georg Brandt', year:'1735', uses:'Superalloys, lithium-ion batteries, blue pigments'},
+        {atomic:28, symbol:'Ni', name:'Nickel', group:'transition', row:3, col:9,
+         mass:'58.6934 u', density:'8.908 g/cm³', melt:'1455 °C', boil:'2913 °C',
+         discoverers:'Axel Fredrik Cronstedt', year:'1751', uses:'Stainless steel, coins, batteries, catalyst'},
+        {atomic:29, symbol:'Cu', name:'Copper', group:'transition', row:3, col:10,
+         mass:'63.546 u', density:'8.96 g/cm³', melt:'1085 °C', boil:'2562 °C',
+         discoverers:'Ancient', year:'Ancient', uses:'Electrical wiring, plumbing, coins'},
+        {atomic:30, symbol:'Zn', name:'Zinc', group:'transition', row:3, col:11,
+         mass:'65.38 u', density:'7.14 g/cm³', melt:'419.5 °C', boil:'907 °C',
+         discoverers:'Ancient', year:'Ancient', uses:'Galvanizing steel, brass, sunscreen'},
+        {atomic:31, symbol:'Ga', name:'Gallium', group:'post-transition', row:3, col:12,
+         mass:'69.723 u', density:'5.91 g/cm³', melt:'29.76 °C', boil:'2204 °C',
+         discoverers:'Paul-Émile Lecoq de Boisbaudran', year:'1875', uses:'Semiconductors, LEDs, solar cells'},
+        {atomic:32, symbol:'Ge', name:'Germanium', group:'metalloid', row:3, col:13,
+         mass:'72.63 u', density:'5.323 g/cm³', melt:'938.25 °C', boil:'2833 °C',
+         discoverers:'Clemens Winkler', year:'1886', uses:'Fiber optics, infrared optics, transistors'},
+        {atomic:33, symbol:'As', name:'Arsenic', group:'metalloid', row:3, col:14,
+         mass:'74.921595 u', density:'5.727 g/cm³', melt:'817 °C (at 28 atm)', boil:'614 °C (sublimes)',
+         discoverers:'Albertus Magnus', year:'1250', uses:'Wood preservatives, semiconductors'},
+        {atomic:34, symbol:'Se', name:'Selenium', group:'nonmetal', row:3, col:15,
+         mass:'78.971 u', density:'4.81 g/cm³', melt:'221 °C', boil:'685 °C',
+         discoverers:'Jöns Jacob Berzelius', year:'1817', uses:'Photocopiers, glass, dandruff shampoos'},
+        {atomic:35, symbol:'Br', name:'Bromine', group:'nonmetal', row:3, col:16,
+         mass:'79.904 u', density:'3.1028 g/cm³', melt:'-7.2 °C', boil:'58.8 °C',
+         discoverers:'Antoine Jérôme Balard', year:'1825', uses:'Flame retardants, drilling fluids'},
+        {atomic:36, symbol:'Kr', name:'Krypton', group:'noble-gas', row:3, col:17,
+         mass:'83.798 u', density:'3.749 g/L (at 0°C)', melt:'-157.37 °C', boil:'-153.415 °C',
+         discoverers:'William Ramsay, Morris Travers', year:'1898', uses:'High-performance light bulbs, lasers'},
+        
+        // Period 5
+        {atomic:37, symbol:'Rb', name:'Rubidium', group:'alkali-metal', row:4, col:0,
+         mass:'85.4678 u', density:'1.532 g/cm³', melt:'39.30 °C', boil:'688 °C',
+         discoverers:'Robert Bunsen, Gustav Kirchhoff', year:'1861', uses:'Atomic clocks, specialty glass'},
+        {atomic:38, symbol:'Sr', name:'Strontium', group:'alkaline-earth', row:4, col:1,
+         mass:'87.62 u', density:'2.64 g/cm³', melt:'777 °C', boil:'1382 °C',
+         discoverers:'William Cruickshank', year:'1787', uses:'Fireworks (red), ferrite magnets'},
+        {atomic:39, symbol:'Y', name:'Yttrium', group:'transition', row:4, col:2,
+         mass:'88.90584 u', density:'4.472 g/cm³', melt:'1526 °C', boil:'2930 °C',
+         discoverers:'Johan Gadolin', year:'1794', uses:'LEDs, superconductors, lasers'},
+        {atomic:40, symbol:'Zr', name:'Zirconium', group:'transition', row:4, col:3,
+         mass:'91.224 u', density:'6.52 g/cm³', melt:'1855 °C', boil:'4409 °C',
+         discoverers:'Martin Heinrich Klaproth', year:'1789', uses:'Nuclear fuel cladding, corrosion-resistant alloys'},
+        {atomic:41, symbol:'Nb', name:'Niobium', group:'transition', row:4, col:4,
+         mass:'92.90637 u', density:'8.57 g/cm³', melt:'2477 °C', boil:'4744 °C',
+         discoverers:'Charles Hatchett', year:'1801', uses:'Superconducting magnets, steel alloys'},
+        {atomic:42, symbol:'Mo', name:'Molybdenum', group:'transition', row:4, col:5,
+         mass:'95.95 u', density:'10.28 g/cm³', melt:'2623 °C', boil:'4639 °C',
+         discoverers:'Carl Wilhelm Scheele', year:'1778', uses:'High-strength steel, catalyst'},
+        {atomic:43, symbol:'Tc', name:'Technetium', group:'transition', row:4, col:6,
+         mass:'98 u', density:'11.5 g/cm³', melt:'2157 °C', boil:'4265 °C',
+         discoverers:'Emilio Segrè, Carlo Perrier', year:'1937', uses:'Medical imaging'},
+        {atomic:44, symbol:'Ru', name:'Ruthenium', group:'transition', row:4, col:7,
+         mass:'101.07 u', density:'12.45 g/cm³', melt:'2334 °C', boil:'4150 °C',
+         discoverers:'Karl Ernst Claus', year:'1844', uses:'Hardens platinum, electronics'},
+        {atomic:45, symbol:'Rh', name:'Rhodium', group:'transition', row:4, col:8,
+         mass:'102.9055 u', density:'12.41 g/cm³', melt:'1964 °C', boil:'3695 °C',
+         discoverers:'William Hyde Wollaston', year:'1803', uses:'Catalytic converters, jewelry plating'},
+        {atomic:46, symbol:'Pd', name:'Palladium', group:'transition', row:4, col:9,
+         mass:'106.42 u', density:'12.023 g/cm³', melt:'1554.9 °C', boil:'2963 °C',
+         discoverers:'William Hyde Wollaston', year:'1802', uses:'Catalytic converters, hydrogen storage'},
+        {atomic:47, symbol:'Ag', name:'Silver', group:'transition', row:4, col:10,
+         mass:'107.8682 u', density:'10.49 g/cm³', melt:'961.78 °C', boil:'2162 °C',
+         discoverers:'Ancient', year:'Ancient', uses:'Jewelry, coins, solar panels, antibacterial'},
+        {atomic:48, symbol:'Cd', name:'Cadmium', group:'transition', row:4, col:11,
+         mass:'112.414 u', density:'8.65 g/cm³', melt:'321.07 °C', boil:'767 °C',
+         discoverers:'Friedrich Stromeyer', year:'1817', uses:'Batteries (NiCd), pigments'},
+        {atomic:49, symbol:'In', name:'Indium', group:'post-transition', row:4, col:12,
+         mass:'114.818 u', density:'7.31 g/cm³', melt:'156.60 °C', boil:'2072 °C',
+         discoverers:'Ferdinand Reich, Hieronymous Theodor Richter', year:'1863', uses:'Touch screens (ITO), solders'},
+        {atomic:50, symbol:'Sn', name:'Tin', group:'post-transition', row:4, col:13,
+         mass:'118.710 u', density:'7.365 g/cm³', melt:'231.93 °C', boil:'2602 °C',
+         discoverers:'Ancient', year:'Ancient', uses:'Solder, bronze alloy, food can coating'},
+        {atomic:51, symbol:'Sb', name:'Antimony', group:'metalloid', row:4, col:14,
+         mass:'121.760 u', density:'6.697 g/cm³', melt:'630.63 °C', boil:'1587 °C',
+         discoverers:'Ancient', year:'Ancient', uses:'Flame retardants, lead-acid batteries'},
+        {atomic:52, symbol:'Te', name:'Tellurium', group:'metalloid', row:4, col:15,
+         mass:'127.60 u', density:'6.24 g/cm³', melt:'449.51 °C', boil:'988 °C',
+         discoverers:'Franz-Joseph Müller von Reichenstein', year:'1782', uses:'Solar panels, thermoelectric devices'},
+        {atomic:53, symbol:'I', name:'Iodine', group:'nonmetal', row:4, col:16,
+         mass:'126.90447 u', density:'4.933 g/cm³', melt:'113.7 °C', boil:'184.3 °C',
+         discoverers:'Bernard Courtois', year:'1811', uses:'Thyroid health, antiseptic, iodized salt'},
+        {atomic:54, symbol:'Xe', name:'Xenon', group:'noble-gas', row:4, col:17,
+         mass:'131.293 u', density:'5.894 g/L (at 0°C)', melt:'-111.75 °C', boil:'-108.12 °C',
+         discoverers:'William Ramsay, Morris Travers', year:'1898', uses:'Flash lamps, ion thrusters, anesthesia'},
+        
+        // Period 6 (Main group)
+        {atomic:55, symbol:'Cs', name:'Caesium', group:'alkali-metal', row:5, col:0,
+         mass:'132.90545196 u', density:'1.93 g/cm³', melt:'28.5 °C', boil:'671 °C',
+         discoverers:'Robert Bunsen, Gustav Kirchhoff', year:'1860', uses:'Atomic clocks, drilling fluids'},
+        {atomic:56, symbol:'Ba', name:'Barium', group:'alkaline-earth', row:5, col:1,
+         mass:'137.327 u', density:'3.51 g/cm³', melt:'727 °C', boil:'1845 °C',
+         discoverers:'Humphry Davy', year:'1808', uses:'Drilling mud, fireworks (green), X-ray contrast'},
+        {atomic:57, symbol:'La', name:'Lanthanum', group:'lanthanide', row:5, col:2,
+         mass:'138.90547 u', density:'6.162 g/cm³', melt:'920 °C', boil:'3464 °C',
+         discoverers:'Carl Gustaf Mosander', year:'1839', uses:'Camera lenses, hydrogen storage'},
+        {atomic:72, symbol:'Hf', name:'Hafnium', group:'transition', row:5, col:3,
+         mass:'178.49 u', density:'13.31 g/cm³', melt:'2233 °C', boil:'4603 °C',
+         discoverers:'Dirk Coster, George de Hevesy', year:'1923', uses:'Nuclear control rods, superalloys'},
+        {atomic:73, symbol:'Ta', name:'Tantalum', group:'transition', row:5, col:4,
+         mass:'180.94788 u', density:'16.69 g/cm³', melt:'3017 °C', boil:'5458 °C',
+         discoverers:'Anders Gustaf Ekeberg', year:'1802', uses:'Capacitors, surgical implants'},
+        {atomic:74, symbol:'W', name:'Tungsten', group:'transition', row:5, col:5,
+         mass:'183.84 u', density:'19.25 g/cm³', melt:'3422 °C', boil:'5555 °C',
+         discoverers:'Juan José Elhuyar, Fausto Elhuyar', year:'1783', uses:'Light bulb filaments, welding electrodes'},
+        {atomic:75, symbol:'Re', name:'Rhenium', group:'transition', row:5, col:6,
+         mass:'186.207 u', density:'21.02 g/cm³', melt:'3186 °C', boil:'5596 °C',
+         discoverers:'Masataka Ogawa', year:'1908', uses:'Jet engine superalloys, catalysts'},
+        {atomic:76, symbol:'Os', name:'Osmium', group:'transition', row:5, col:7,
+         mass:'190.23 u', density:'22.59 g/cm³', melt:'3033 °C', boil:'5012 °C',
+         discoverers:'Smithson Tennant', year:'1803', uses:'Hardest metal, fountain pen tips'},
+        {atomic:77, symbol:'Ir', name:'Iridium', group:'transition', row:5, col:8,
+         mass:'192.217 u', density:'22.56 g/cm³', melt:'2446 °C', boil:'4428 °C',
+         discoverers:'Smithson Tennant', year:'1803', uses:'Spark plugs, crucibles, satellite components'},
+        {atomic:78, symbol:'Pt', name:'Platinum', group:'transition', row:5, col:9,
+         mass:'195.084 u', density:'21.45 g/cm³', melt:'1768.3 °C', boil:'3825 °C',
+         discoverers:'Antonio de Ulloa', year:'1735', uses:'Catalytic converters, jewelry, anticancer drugs'},
+        {atomic:79, symbol:'Au', name:'Gold', group:'transition', row:5, col:10,
+         mass:'196.966569 u', density:'19.30 g/cm³', melt:'1064.18 °C', boil:'2856 °C',
+         discoverers:'Ancient', year:'Ancient', uses:'Jewelry, electronics, monetary standard'},
+        {atomic:80, symbol:'Hg', name:'Mercury', group:'transition', row:5, col:11,
+         mass:'200.592 u', density:'13.534 g/cm³', melt:'-38.83 °C', boil:'356.73 °C',
+         discoverers:'Ancient', year:'Ancient', uses:'Thermometers, barometers, fluorescent lamps (historical)'},
+        {atomic:81, symbol:'Tl', name:'Thallium', group:'post-transition', row:5, col:12,
+         mass:'204.38 u', density:'11.85 g/cm³', melt:'304 °C', boil:'1473 °C',
+         discoverers:'William Crookes', year:'1861', uses:'Infrared detectors, medical imaging'},
+        {atomic:82, symbol:'Pb', name:'Lead', group:'post-transition', row:5, col:13,
+         mass:'207.2 u', density:'11.34 g/cm³', melt:'327.46 °C', boil:'1749 °C',
+         discoverers:'Ancient', year:'Ancient', uses:'Batteries, radiation shielding, solder'},
+        {atomic:83, symbol:'Bi', name:'Bismuth', group:'post-transition', row:5, col:14,
+         mass:'208.98040 u', density:'9.78 g/cm³', melt:'271.5 °C', boil:'1564 °C',
+         discoverers:'Claude François Geoffroy', year:'1753', uses:'Pepto-Bismol, low-melt alloys'},
+        {atomic:84, symbol:'Po', name:'Polonium', group:'post-transition', row:5, col:15,
+         mass:'209 u', density:'9.196 g/cm³', melt:'254 °C', boil:'962 °C',
+         discoverers:'Marie Curie, Pierre Curie', year:'1898', uses:'Anti-static brushes'},
+        {atomic:85, symbol:'At', name:'Astatine', group:'post-transition', row:5, col:16,
+         mass:'210 u', density:'6.35 g/cm³', melt:'302 °C', boil:'337 °C',
+         discoverers:'Dale R. Corson, Kenneth Ross MacKenzie, Emilio Segrè', year:'1940', uses:'Potential cancer therapy (rare)'},
+        {atomic:86, symbol:'Rn', name:'Radon', group:'noble-gas', row:5, col:17,
+         mass:'222 u', density:'9.73 g/L (at 0°C)', melt:'-71 °C', boil:'-61.7 °C',
+         discoverers:'Friedrich Ernst Dorn', year:'1900', uses:'Earthquake prediction (radioactive gas)'},
+        
+        // Period 7 (Main group) - Elements 87-118 all included
+        {atomic:87, symbol:'Fr', name:'Francium', group:'alkali-metal', row:6, col:0,
+         mass:'223 u', density:'1.87 g/cm³', melt:'27 °C', boil:'677 °C',
+         discoverers:'Marguerite Perey', year:'1939', uses:'Extremely radioactive, research only'},
+        {atomic:88, symbol:'Ra', name:'Radium', group:'alkaline-earth', row:6, col:1,
+         mass:'226 u', density:'5.5 g/cm³', melt:'700 °C', boil:'1140 °C',
+         discoverers:'Marie Curie, Pierre Curie', year:'1898', uses:'Radiotherapy (historical)'},
+        {atomic:89, symbol:'Ac', name:'Actinium', group:'actinide', row:6, col:2,
+         mass:'227 u', density:'10.07 g/cm³', melt:'1050 °C', boil:'3198 °C',
+         discoverers:'Friedrich Oskar Giesel', year:'1902', uses:'Neutron source, cancer research'},
+        {atomic:104, symbol:'Rf', name:'Rutherfordium', group:'transition', row:6, col:3,
+         mass:'267 u', density:'23.2 g/cm³ (estimated)', melt:'2100 °C', boil:'5500 °C',
+         discoverers:'Albert Ghiorso', year:'1969', uses:'Synthetic, research only'},
+        {atomic:105, symbol:'Db', name:'Dubnium', group:'transition', row:6, col:4,
+         mass:'268 u', density:'29.3 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Albert Ghiorso', year:'1970', uses:'Synthetic, research only'},
+        {atomic:106, symbol:'Sg', name:'Seaborgium', group:'transition', row:6, col:5,
+         mass:'269 u', density:'35.0 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Albert Ghiorso', year:'1974', uses:'Synthetic, research only'},
+        {atomic:107, symbol:'Bh', name:'Bohrium', group:'transition', row:6, col:6,
+         mass:'270 u', density:'37.1 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Peter Armbruster, Gottfried Münzenberg', year:'1981', uses:'Synthetic, research only'},
+        {atomic:108, symbol:'Hs', name:'Hassium', group:'transition', row:6, col:7,
+         mass:'277 u', density:'40.7 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Peter Armbruster, Gottfried Münzenberg', year:'1984', uses:'Synthetic, research only'},
+        {atomic:109, symbol:'Mt', name:'Meitnerium', group:'unknown', row:6, col:8,
+         mass:'278 u', density:'37.4 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Peter Armbruster, Gottfried Münzenberg', year:'1982', uses:'Synthetic, research only'},
+        {atomic:110, symbol:'Ds', name:'Darmstadtium', group:'unknown', row:6, col:9,
+         mass:'281 u', density:'34.8 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Sigurd Hofmann', year:'1994', uses:'Synthetic, research only'},
+        {atomic:111, symbol:'Rg', name:'Roentgenium', group:'unknown', row:6, col:10,
+         mass:'282 u', density:'28.7 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Sigurd Hofmann', year:'1994', uses:'Synthetic, research only'},
+        {atomic:112, symbol:'Cn', name:'Copernicium', group:'unknown', row:6, col:11,
+         mass:'285 u', density:'23.7 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Sigurd Hofmann', year:'1996', uses:'Synthetic, research only'},
+        {atomic:113, symbol:'Nh', name:'Nihonium', group:'unknown', row:6, col:12,
+         mass:'286 u', density:'16 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Kosuke Morita', year:'2004', uses:'Synthetic, research only'},
+        {atomic:114, symbol:'Fl', name:'Flerovium', group:'unknown', row:6, col:13,
+         mass:'289 u', density:'14 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Yuri Oganessian', year:'1999', uses:'Synthetic, research only'},
+        {atomic:115, symbol:'Mc', name:'Moscovium', group:'unknown', row:6, col:14,
+         mass:'290 u', density:'13.5 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Yuri Oganessian', year:'2004', uses:'Synthetic, research only'},
+        {atomic:116, symbol:'Lv', name:'Livermorium', group:'unknown', row:6, col:15,
+         mass:'293 u', density:'12.9 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Yuri Oganessian', year:'2000', uses:'Synthetic, research only'},
+        {atomic:117, symbol:'Ts', name:'Tennessine', group:'unknown', row:6, col:16,
+         mass:'294 u', density:'7.2 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Yuri Oganessian', year:'2010', uses:'Synthetic, research only'},
+        {atomic:118, symbol:'Og', name:'Oganesson', group:'unknown', row:6, col:17,
+         mass:'294 u', density:'4.9 g/cm³ (estimated)', melt:'—', boil:'—',
+         discoverers:'Yuri Oganessian', year:'2002', uses:'Synthetic, research only'},
+        
+        // Lanthanides (57-71) - MOVED ONE TILE RIGHT (start at col 3)
+        {atomic:58, symbol:'Ce', name:'Cerium', group:'lanthanide', row:7, col:3,
+         mass:'140.116 u', density:'6.770 g/cm³', melt:'795 °C', boil:'3443 °C',
+         discoverers:'Jöns Jacob Berzelius, Wilhelm Hisinger', year:'1803', uses:'Glass polishing, catalytic converters, flint'},
+        {atomic:59, symbol:'Pr', name:'Praseodymium', group:'lanthanide', row:7, col:4,
+         mass:'140.90766 u', density:'6.64 g/cm³', melt:'935 °C', boil:'3130 °C',
+         discoverers:'Carl Auer von Welsbach', year:'1885', uses:'Magnets, lasers, aircraft engines'},
+        {atomic:60, symbol:'Nd', name:'Neodymium', group:'lanthanide', row:7, col:5,
+         mass:'144.242 u', density:'7.01 g/cm³', melt:'1024 °C', boil:'3074 °C',
+         discoverers:'Carl Auer von Welsbach', year:'1885', uses:'Strong magnets for speakers, EVs, wind turbines'},
+        {atomic:61, symbol:'Pm', name:'Promethium', group:'lanthanide', row:7, col:6,
+         mass:'145 u', density:'7.26 g/cm³', melt:'1042 °C', boil:'3000 °C',
+         discoverers:'Jacob A. Marinsky, Lawrence E. Glendenin, Charles D. Coryell', year:'1945', uses:'Pacemakers, thickness gauges'},
+        {atomic:62, symbol:'Sm', name:'Samarium', group:'lanthanide', row:7, col:7,
+         mass:'150.36 u', density:'7.52 g/cm³', melt:'1072 °C', boil:'1794 °C',
+         discoverers:'Paul-Émile Lecoq de Boisbaudran', year:'1879', uses:'Magnets, cancer treatment, nuclear reactors'},
+        {atomic:63, symbol:'Eu', name:'Europium', group:'lanthanide', row:7, col:8,
+         mass:'151.964 u', density:'5.264 g/cm³', melt:'826 °C', boil:'1529 °C',
+         discoverers:'Eugène-Anatole Demarçay', year:'1901', uses:'Red/blue phosphors in LEDs, fluorescent lamps'},
+        {atomic:64, symbol:'Gd', name:'Gadolinium', group:'lanthanide', row:7, col:9,
+         mass:'157.25 u', density:'7.90 g/cm³', melt:'1312 °C', boil:'3000 °C',
+         discoverers:'Jean Charles Galissard de Marignac', year:'1880', uses:'MRI contrast agent, neutron shielding'},
+        {atomic:65, symbol:'Tb', name:'Terbium', group:'lanthanide', row:7, col:10,
+         mass:'158.92535 u', density:'8.23 g/cm³', melt:'1356 °C', boil:'2800 °C',
+         discoverers:'Carl Gustaf Mosander', year:'1843', uses:'Green phosphors, sonar systems'},
+        {atomic:66, symbol:'Dy', name:'Dysprosium', group:'lanthanide', row:7, col:11,
+         mass:'162.500 u', density:'8.54 g/cm³', melt:'1407 °C', boil:'2562 °C',
+         discoverers:'Paul-Émile Lecoq de Boisbaudran', year:'1886', uses:'Hard disk drives, lasers, nuclear reactors'},
+        {atomic:67, symbol:'Ho', name:'Holmium', group:'lanthanide', row:7, col:12,
+         mass:'164.93033 u', density:'8.79 g/cm³', melt:'1461 °C', boil:'2600 °C',
+         discoverers:'Marc Delafontaine, Jacques-Louis Soret', year:'1878', uses:'Lasers, magnets, wavelength calibration'},
+        {atomic:68, symbol:'Er', name:'Erbium', group:'lanthanide', row:7, col:13,
+         mass:'167.259 u', density:'9.066 g/cm³', melt:'1497 °C', boil:'2868 °C',
+         discoverers:'Carl Gustaf Mosander', year:'1843', uses:'Fiber-optic amplifiers, pink glass coloring'},
+        {atomic:69, symbol:'Tm', name:'Thulium', group:'lanthanide', row:7, col:14,
+         mass:'168.93422 u', density:'9.32 g/cm³', melt:'1545 °C', boil:'1950 °C',
+         discoverers:'Per Teodor Cleve', year:'1879', uses:'Portable X-ray devices, lasers'},
+        {atomic:70, symbol:'Yb', name:'Ytterbium', group:'lanthanide', row:7, col:15,
+         mass:'173.045 u', density:'6.90 g/cm³', melt:'819 °C', boil:'1196 °C',
+         discoverers:'Jean Charles Galissard de Marignac', year:'1878', uses:'Atomic clocks, stress sensors, lasers'},
+        {atomic:71, symbol:'Lu', name:'Lutetium', group:'lanthanide', row:7, col:16,
+         mass:'174.9668 u', density:'9.841 g/cm³', melt:'1652 °C', boil:'3402 °C',
+         discoverers:'Georges Urbain', year:'1907', uses:'PET scan detectors, high-refractive glass'},
+        
+        // Actinides (89-103) - MOVED ONE TILE RIGHT (start at col 3)
+        {atomic:90, symbol:'Th', name:'Thorium', group:'actinide', row:8, col:3,
+         mass:'232.0377 u', density:'11.724 g/cm³', melt:'1750 °C', boil:'4785 °C',
+         discoverers:'Jöns Jacob Berzelius', year:'1829', uses:'Potential nuclear fuel, gas lantern mantles'},
+        {atomic:91, symbol:'Pa', name:'Protactinium', group:'actinide', row:8, col:4,
+         mass:'231.03588 u', density:'15.37 g/cm³', melt:'1568 °C', boil:'4027 °C',
+         discoverers:'Otto Hahn, Lise Meitner', year:'1917', uses:'Rare, research only'},
+        {atomic:92, symbol:'U', name:'Uranium', group:'actinide', row:8, col:5,
+         mass:'238.02891 u', density:'19.1 g/cm³', melt:'1132.2 °C', boil:'4131 °C',
+         discoverers:'Martin Heinrich Klaproth', year:'1789', uses:'Nuclear fuel, depleted uranium armor'},
+        {atomic:93, symbol:'Np', name:'Neptunium', group:'actinide', row:8, col:6,
+         mass:'237 u', density:'20.45 g/cm³', melt:'639 °C', boil:'3900 °C',
+         discoverers:'Edwin McMillan, Philip H. Abelson', year:'1940', uses:'Nuclear reactor byproduct, neutron detection'},
+        {atomic:94, symbol:'Pu', name:'Plutonium', group:'actinide', row:8, col:7,
+         mass:'244 u', density:'19.816 g/cm³', melt:'639.4 °C', boil:'3228 °C',
+         discoverers:'Glenn T. Seaborg', year:'1940', uses:'Nuclear weapons, space probe power sources'},
+        {atomic:95, symbol:'Am', name:'Americium', group:'actinide', row:8, col:8,
+         mass:'243 u', density:'13.69 g/cm³', melt:'1176 °C', boil:'2607 °C',
+         discoverers:'Glenn T. Seaborg', year:'1944', uses:'Smoke detectors, industrial gauges'},
+        {atomic:96, symbol:'Cm', name:'Curium', group:'actinide', row:8, col:9,
+         mass:'247 u', density:'13.51 g/cm³', melt:'1345 °C', boil:'3100 °C',
+         discoverers:'Glenn T. Seaborg', year:'1944', uses:'Alpha particle sources'},
+        {atomic:97, symbol:'Bk', name:'Berkelium', group:'actinide', row:8, col:10,
+         mass:'247 u', density:'14.78 g/cm³', melt:'986 °C', boil:'—',
+         discoverers:'Glenn T. Seaborg', year:'1949', uses:'Synthetic, research only'},
+        {atomic:98, symbol:'Cf', name:'Californium', group:'actinide', row:8, col:11,
+         mass:'251 u', density:'15.1 g/cm³', melt:'900 °C', boil:'—',
+         discoverers:'Glenn T. Seaborg', year:'1950', uses:'Neutron source, airport scanners, cancer treatment'},
+        {atomic:99, symbol:'Es', name:'Einsteinium', group:'actinide', row:8, col:12,
+         mass:'252 u', density:'13.5 g/cm³', melt:'860 °C', boil:'—',
+         discoverers:'Albert Ghiorso', year:'1952', uses:'Synthetic, research only'},
+        {atomic:100, symbol:'Fm', name:'Fermium', group:'actinide', row:8, col:13,
+         mass:'257 u', density:'9.7 g/cm³', melt:'1527 °C', boil:'—',
+         discoverers:'Albert Ghiorso', year:'1952', uses:'Synthetic, research only'},
+        {atomic:101, symbol:'Md', name:'Mendelevium', group:'actinide', row:8, col:14,
+         mass:'258 u', density:'10.3 g/cm³', melt:'827 °C', boil:'—',
+         discoverers:'Albert Ghiorso', year:'1955', uses:'Synthetic, research only'},
+        {atomic:102, symbol:'No', name:'Nobelium', group:'actinide', row:8, col:15,
+         mass:'259 u', density:'9.9 g/cm³', melt:'827 °C', boil:'—',
+         discoverers:'Albert Ghiorso', year:'1958', uses:'Synthetic, research only'},
+        {atomic:103, symbol:'Lr', name:'Lawrencium', group:'actinide', row:8, col:16,
+         mass:'266 u', density:'14.4 g/cm³', melt:'1627 °C', boil:'—',
+         discoverers:'Albert Ghiorso', year:'1961', uses:'Synthetic, research only'}
+      ];
+
+      // ========== THEME SYSTEM ==========
+      const body = document.getElementById('body');
+      const themeScreen = document.getElementById('theme-screen');
+      const themeBtn = document.getElementById('theme-btn');
+      const themeCloseBtn = document.getElementById('theme-close-btn');
+      
+      // Theme state - each page has its own theme
+      let pageThemes = {
+        main: 'main',
+        periodic: 'periodic',
+        lab: 'lab',
+        quiz: 'twilight'
+      };
+      
+      let currentPage = 'main';
+      let periodicSparkInterval = null;
+      let labSparkInterval = null;
+      let labSparkColorIndex = 0;
+      
+      // Light pastel colors for lab sparks
+      const labSparkColors = [
+        '#ffb3ba', // light pink
+        '#ffdfba', // light peach
+        '#ffffba', // light yellow
+        '#baffc9', // light green
+        '#bae1ff', // light blue
+        '#d0b2ff', // light purple
+        '#f0b2ff', // light lavender
+        '#b2f0ff', // light cyan
+        '#ffb2f0'  // light magenta
+      ];
+      
+      // Function to start periodic sparks (lime green squares)
+      function startPeriodicSparks() {
+        if (periodicSparkInterval) clearInterval(periodicSparkInterval);
+        
+        periodicSparkInterval = setInterval(() => {
+          // Only create sparks if we're on periodic page with periodic theme
+          if (!body.classList.contains('theme-periodic') || currentPage !== 'periodic') return;
+          
+          const spark = document.createElement('div');
+          spark.className = 'periodic-spark';
+          spark.style.left = Math.random() * 100 + '%';
+          spark.style.animationDuration = (Math.random() * 5 + 4) + 's';
+          spark.style.animationDelay = Math.random() * 2 + 's';
+          spark.style.opacity = Math.random() * 0.4 + 0.3;
+          spark.style.width = (Math.random() * 12 + 8) + 'px';
+          spark.style.height = spark.style.width;
+          document.body.appendChild(spark);
+          
+          setTimeout(() => spark.remove(), 10000);
+        }, 200);
+      }
+      
+      // Function to start lab sparks (light-colored squares that shift colors)
+      function startLabSparks() {
+        if (labSparkInterval) clearInterval(labSparkInterval);
+        
+        // Initialize with random color
+        labSparkColorIndex = Math.floor(Math.random() * labSparkColors.length);
+        
+        // Change color every 4 seconds
+        const colorInterval = setInterval(() => {
+          labSparkColorIndex = (labSparkColorIndex + 1) % labSparkColors.length;
+        }, 4000);
+        
+        labSparkInterval = setInterval(() => {
+          // Only create sparks if we're on lab page with lab theme
+          if (!body.classList.contains('theme-lab') || currentPage !== 'lab') return;
+          
+          const spark = document.createElement('div');
+          spark.className = 'lab-spark';
+          spark.style.left = Math.random() * 100 + '%';
+          spark.style.animationDuration = (Math.random() * 5 + 4) + 's';
+          spark.style.animationDelay = Math.random() * 2 + 's';
+          spark.style.backgroundColor = labSparkColors[labSparkColorIndex];
+          spark.style.width = (Math.random() * 12 + 8) + 'px';
+          spark.style.height = spark.style.width;
+          spark.style.opacity = 0.6 + Math.random() * 0.3;
+          document.body.appendChild(spark);
+          
+          setTimeout(() => spark.remove(), 10000);
+        }, 250);
+        
+        return colorInterval;
+      }
+      
+      function stopAllSparks() {
+        if (periodicSparkInterval) {
+          clearInterval(periodicSparkInterval);
+          periodicSparkInterval = null;
+        }
+        if (labSparkInterval) {
+          clearInterval(labSparkInterval);
+          labSparkInterval = null;
+        }
+        document.querySelectorAll('.periodic-spark, .lab-spark').forEach(s => s.remove());
+      }
+      
+      // Apply theme for current page
+      function applyThemeForPage(page) {
+        const theme = pageThemes[page];
+        body.className = '';
+        body.classList.add(`theme-${theme}`);
+        currentPage = page;
+        
+        stopAllSparks();
+        
+        if (page === 'periodic' && theme === 'periodic') {
+          startPeriodicSparks();
+        } else if (page === 'lab' && theme === 'lab') {
+          startLabSparks();
+        }
+      }
+      
+      // Theme selection for each page
+      document.querySelectorAll('.theme-option').forEach(option => {
+        option.addEventListener('click', () => {
+          const theme = option.dataset.theme;
+          
+          // Update theme for current page
+          pageThemes[currentPage] = theme;
+          
+          // Apply theme
+          body.className = '';
+          body.classList.add(`theme-${theme}`);
+          
+          document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+          option.classList.add('active');
+          
+          stopAllSparks();
+          
+          if (currentPage === 'periodic' && theme === 'periodic') {
+            startPeriodicSparks();
+          } else if (currentPage === 'lab' && theme === 'lab') {
+            startLabSparks();
+          }
+        });
+      });
+      
+      themeBtn.addEventListener('click', () => {
+        themeScreen.classList.remove('hidden');
+        setTimeout(() => themeScreen.classList.add('open'), 10);
+      });
+      
+      themeCloseBtn.addEventListener('click', () => {
+        themeScreen.classList.remove('open');
+        setTimeout(() => themeScreen.classList.add('hidden'), 300);
+      });
+      
+      // ========== SCREEN NAVIGATION ==========
+      const mainScreen = document.getElementById('main-screen');
+      const periodicScreen = document.getElementById('periodic-screen');
+      const labScreen = document.getElementById('lab-screen');
+      const quizScreen = document.getElementById('quiz-screen');
+      
+      document.getElementById('periodic-btn').addEventListener('click', () => {
+        mainScreen.classList.remove('active');
+        periodicScreen.classList.add('active');
+        currentPage = 'periodic';
+        generatePeriodicTable();
+        applyThemeForPage('periodic');
+      });
+      
+      document.getElementById('lab-btn').addEventListener('click', () => {
+        mainScreen.classList.remove('active');
+        labScreen.classList.add('active');
+        currentPage = 'lab';
+        applyThemeForPage('lab');
+      });
+      
+      document.getElementById('quiz-btn').addEventListener('click', () => {
+        mainScreen.classList.remove('active');
+        quizScreen.classList.add('active');
+        currentPage = 'quiz';
+        applyThemeForPage('quiz');
+        loadRandomQuestions();
+      });
+      
+      document.getElementById('periodic-back').addEventListener('click', () => {
+        periodicScreen.classList.remove('active');
+        mainScreen.classList.add('active');
+        currentPage = 'main';
+        applyThemeForPage('main');
+      });
+      
+      document.getElementById('lab-back').addEventListener('click', () => {
+        labScreen.classList.remove('active');
+        mainScreen.classList.add('active');
+        currentPage = 'main';
+        applyThemeForPage('main');
+      });
+      
+      document.getElementById('quiz-back').addEventListener('click', () => {
+        quizScreen.classList.remove('active');
+        mainScreen.classList.add('active');
+        currentPage = 'main';
+        applyThemeForPage('main');
+      });
+      
+      // ========== PERIODIC TABLE ==========
+      function generatePeriodicTable() {
+        const grid = document.getElementById('periodicGrid');
+        grid.innerHTML = '';
+        
+        const rows = 9;
+        const cols = 18;
+        
+        // Create empty grid
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'empty';
+            cell.dataset.row = r;
+            cell.dataset.col = c;
+            grid.appendChild(cell);
+          }
+        }
+        
+        // Place elements
+        elements.forEach(el => {
+          const {row, col, atomic, symbol, name, group} = el;
+          if (row >= rows || col >= cols) return;
+          
+          const index = row * cols + col;
+          const cell = grid.children[index];
+          if (!cell) return;
+          
+          cell.className = `element ${group}`;
+          cell.dataset.category = group;
+          cell.innerHTML = `
+            <div class="atomic">${atomic}</div>
+            <div class="symbol">${symbol}</div>
+            <div class="ename">${name}</div>
+          `;
+          
+          cell.addEventListener('click', () => showElementDetails(el));
+        });
+        
+        // Add labels for lanthanides and actinides
+        const emptyCells = document.querySelectorAll('.empty');
+        emptyCells.forEach(cell => {
+          const row = parseInt(cell.dataset.row);
+          const col = parseInt(cell.dataset.col);
+          if ((row === 7 || row === 8) && col === 2) {
+            cell.textContent = row === 7 ? 'lanthanides' : 'actinides';
+            cell.style.fontSize = '0.6rem';
+            cell.style.color = '#a0c0e0';
+          }
+        });
+      }
+
+      function showElementDetails(element) {
+        const modal = document.getElementById('element-modal');
+        const title = document.getElementById('modal-title');
+        const content = document.getElementById('modal-content');
+        
+        title.textContent = `${element.name} (${element.symbol}) · Atomic ${element.atomic}`;
+        content.innerHTML = `
+          <div class="element-data">
+            <span class="data-label">Atomic Mass:</span>
+            <span class="data-value">${element.mass}</span>
+            
+            <span class="data-label">Density:</span>
+            <span class="data-value">${element.density}</span>
+            
+            <span class="data-label">Melting Point:</span>
+            <span class="data-value">${element.melt}</span>
+            
+            <span class="data-label">Boiling Point:</span>
+            <span class="data-value">${element.boil}</span>
+            
+            <span class="data-label">Discovered:</span>
+            <span class="data-value">${element.discoverers} (${element.year})</span>
+          </div>
+          <div class="common-uses">
+            <span class="data-label">Common Uses:</span>
+            <p>${element.uses}</p>
+          </div>
+        `;
+        
+        modal.classList.remove('hidden');
+      }
+
+      document.getElementById('close-modal').addEventListener('click', () => {
+        document.getElementById('element-modal').classList.add('hidden');
+      });
+
+      // ========== CATEGORY FILTERS ==========
+      let activeCategory = null;
+      
+      function filterElements(category) {
+        document.querySelectorAll('.element').forEach(cell => {
+          if (category === 'reset') {
+            cell.classList.remove('dimmed');
+          } else if (cell.dataset.category === category) {
+            cell.classList.remove('dimmed');
+          } else {
+            cell.classList.add('dimmed');
+          }
+        });
+      }
+      
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const category = btn.dataset.category;
+          
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          
+          filterElements(category);
+        });
+      });
+      
+      // ========== VIRTUAL LAB ==========
+      const beaker1 = document.getElementById('beaker1-content');
+      const beaker2 = document.getElementById('beaker2-content');
+      const beaker3 = document.getElementById('beaker3-content');
+      const reactionLog = document.getElementById('reaction-log');
+      const clearBtn = document.getElementById('clear-beakers');
+      
+      let beaker1Chemicals = [];
+      let beaker2Chemicals = [];
+      let beaker3Chemicals = [];
+      
+      document.querySelectorAll('.chemical-item').forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', item.dataset.chemical);
+        });
+      });
+      
+      document.querySelectorAll('.beaker').forEach(beaker => {
+        beaker.addEventListener('dragover', (e) => e.preventDefault());
+        
+        beaker.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const chemical = e.dataTransfer.getData('text/plain');
+          const beakerId = beaker.dataset.beaker;
+          
+          if (beakerId === '1') {
+            beaker1Chemicals.push(chemical);
+            updateBeaker(1);
+          } else if (beakerId === '2') {
+            beaker2Chemicals.push(chemical);
+            updateBeaker(2);
+          } else if (beakerId === '3') {
+            beaker3Chemicals.push(chemical);
+            updateBeaker(3);
+          }
+        });
+      });
+      
+      function updateBeaker(beakerNum) {
+        let beaker, chemicals;
+        
+        if (beakerNum === 1) {
+          beaker = beaker1;
+          chemicals = beaker1Chemicals;
+        } else if (beakerNum === 2) {
+          beaker = beaker2;
+          chemicals = beaker2Chemicals;
+        } else {
+          beaker = beaker3;
+          chemicals = beaker3Chemicals;
+        }
+        
+        beaker.style.height = Math.min(chemicals.length * 30, 200) + 'px';
+        
+        // Change color based on chemicals
+        if (chemicals.includes('kmno4')) {
+          beaker.style.background = 'linear-gradient(45deg, #b266ff, #8a2be2)';
+        } else if (chemicals.includes('cuso4')) {
+          beaker.style.background = 'linear-gradient(45deg, #6b8cff, #3a5fcf)';
+        } else if (chemicals.includes('fecl3')) {
+          beaker.style.background = 'linear-gradient(45deg, #b85e3a, #8b4513)';
+        } else if (chemicals.includes('agno3')) {
+          beaker.style.background = 'linear-gradient(45deg, #c0c0c0, #808080)';
+        } else {
+          beaker.style.background = 'rgba(255,255,255,0.3)';
+        }
+        
+        if (chemicals.length >= 2) {
+          checkReaction(beakerNum, chemicals);
+        }
+      }
+      
+      function checkReaction(beakerNum, chemicals) {
+        const sorted = [...chemicals].sort().join(',');
+        let message = '';
+        const beakerLetter = beakerNum === 1 ? 'A' : beakerNum === 2 ? 'B' : 'C';
+        
+        // Acid-Base reactions
+        if ((sorted.includes('hcl') && sorted.includes('naoh')) || 
+            (sorted.includes('h2so4') && sorted.includes('naoh'))) {
+          message = `Beaker ${beakerLetter}: Acid-Base → Neutralization (salt water)`;
+        }
+        // Carbonate reactions
+        else if ((sorted.includes('hcl') && sorted.includes('na2co3')) || 
+                 (sorted.includes('h2so4') && sorted.includes('na2co3')) ||
+                 (sorted.includes('hcl') && sorted.includes('caco3'))) {
+          message = `Beaker ${beakerLetter}: Acid + Carbonate → CO₂ bubbles!`;
+        }
+        // Precipitation reactions
+        else if (sorted.includes('cuso4') && sorted.includes('naoh')) {
+          message = `Beaker ${beakerLetter}: CuSO₄ + NaOH → Blue precipitate!`;
+        }
+        else if (sorted.includes('fecl3') && sorted.includes('naoh')) {
+          message = `Beaker ${beakerLetter}: FeCl₃ + NaOH → Brown precipitate`;
+        }
+        else if (sorted.includes('agno3') && sorted.includes('nacl')) {
+          message = `Beaker ${beakerLetter}: AgNO₃ + NaCl → White precipitate (AgCl)`;
+        }
+        else if (sorted.includes('agno3') && sorted.includes('ki')) {
+          message = `Beaker ${beakerLetter}: AgNO₃ + KI → Yellow precipitate (AgI)`;
+        }
+        else if (sorted.includes('kmno4') && sorted.includes('naoh')) {
+          message = `Beaker ${beakerLetter}: KMnO₄ + NaOH → Green then brown (complex)`;
+        }
+        // Metal reactions
+        else if ((sorted.includes('mg') || sorted.includes('zn') || 
+                  sorted.includes('al') || sorted.includes('pb')) && 
+                 (sorted.includes('hcl') || sorted.includes('h2so4'))) {
+          message = `Beaker ${beakerLetter}: Metal + Acid → Hydrogen bubbles!`;
+        }
+        // Ammonia reactions
+        else if (sorted.includes('nh3') && sorted.includes('cuso4')) {
+          message = `Beaker ${beakerLetter}: NH₃ + CuSO₄ → Deep blue complex`;
+        }
+        else if (chemicals.length >= 2) {
+          message = `Beaker ${beakerLetter}: No visible reaction`;
+        }
+        
+        if (message) {
+          const entry = document.createElement('div');
+          entry.className = 'log-entry';
+          entry.textContent = message;
+          reactionLog.insertBefore(entry, reactionLog.firstChild);
+        }
+      }
+      
+      clearBtn.addEventListener('click', () => {
+        beaker1Chemicals = [];
+        beaker2Chemicals = [];
+        beaker3Chemicals = [];
+        beaker1.style.height = '0';
+        beaker2.style.height = '0';
+        beaker3.style.height = '0';
+        beaker1.style.background = 'rgba(255,255,255,0.3)';
+        beaker2.style.background = 'rgba(255,255,255,0.3)';
+        beaker3.style.background = 'rgba(255,255,255,0.3)';
+        reactionLog.innerHTML = '<div class="log-entry">Beakers cleared. Ready for new experiments!</div>';
+      });
+      
+      // ========== QUIZ WITH 50 QUESTIONS ==========
+      const allQuestions = [
+        // Original 10 questions
+        {
+          question: 'What is the chemical symbol for Gold?',
+          options: ['Go', 'Gd', 'Au', 'Ag'],
+          correct: 2
+        },
+        {
+          question: 'Which element has the atomic number 1?',
+          options: ['Helium', 'Hydrogen', 'Oxygen', 'Carbon'],
+          correct: 1
+        },
+        {
+          question: 'What is the most abundant gas in Earth\'s atmosphere?',
+          options: ['Oxygen', 'Carbon Dioxide', 'Nitrogen', 'Argon'],
+          correct: 2
+        },
+        {
+          question: 'Which element is liquid at room temperature?',
+          options: ['Iron', 'Mercury', 'Aluminum', 'Copper'],
+          correct: 1
+        },
+        {
+          question: 'What is the chemical symbol for Sodium?',
+          options: ['So', 'Sd', 'Na', 'Nd'],
+          correct: 2
+        },
+        {
+          question: 'Which element is essential for thyroid function?',
+          options: ['Iron', 'Calcium', 'Iodine', 'Potassium'],
+          correct: 2
+        },
+        {
+          question: 'What is the lightest element?',
+          options: ['Helium', 'Hydrogen', 'Lithium', 'Oxygen'],
+          correct: 1
+        },
+        {
+          question: 'Which element is used in batteries?',
+          options: ['Lithium', 'Sodium', 'Potassium', 'Calcium'],
+          correct: 0
+        },
+        {
+          question: 'What is the chemical symbol for Iron?',
+          options: ['Ir', 'Fe', 'In', 'Io'],
+          correct: 1
+        },
+        {
+          question: 'Which noble gas is used in balloons?',
+          options: ['Neon', 'Argon', 'Helium', 'Krypton'],
+          correct: 2
+        },
+        
+        // 40 additional questions
+        {
+          question: 'What is the chemical symbol for Silver?',
+          options: ['Si', 'Ag', 'Au', 'Sr'],
+          correct: 1
+        },
+        {
+          question: 'Which element has the atomic number 6?',
+          options: ['Carbon', 'Nitrogen', 'Oxygen', 'Boron'],
+          correct: 0
+        },
+        {
+          question: 'What is the most abundant element in the universe?',
+          options: ['Oxygen', 'Helium', 'Hydrogen', 'Carbon'],
+          correct: 2
+        },
+        {
+          question: 'Which element is a halogen?',
+          options: ['Sodium', 'Chlorine', 'Magnesium', 'Calcium'],
+          correct: 1
+        },
+        {
+          question: 'What is the chemical symbol for Potassium?',
+          options: ['P', 'K', 'Po', 'Pt'],
+          correct: 1
+        },
+        {
+          question: 'Which element is a noble gas?',
+          options: ['Nitrogen', 'Oxygen', 'Neon', 'Fluorine'],
+          correct: 2
+        },
+        {
+          question: 'What is the atomic number of Oxygen?',
+          options: ['6', '7', '8', '9'],
+          correct: 2
+        },
+        {
+          question: 'Which element is used in pencils?',
+          options: ['Lead', 'Carbon', 'Graphite', 'Charcoal'],
+          correct: 1
+        },
+        {
+          question: 'What is the chemical symbol for Calcium?',
+          options: ['C', 'Ca', 'Cl', 'Cu'],
+          correct: 1
+        },
+        {
+          question: 'Which element is a transition metal?',
+          options: ['Aluminum', 'Iron', 'Silicon', 'Phosphorus'],
+          correct: 1
+        },
+        {
+          question: 'What is the atomic number of Helium?',
+          options: ['1', '2', '3', '4'],
+          correct: 1
+        },
+        {
+          question: 'Which element is a metalloid?',
+          options: ['Silicon', 'Carbon', 'Oxygen', 'Nitrogen'],
+          correct: 0
+        },
+        {
+          question: 'What is the chemical symbol for Tin?',
+          options: ['Ti', 'Tn', 'Sn', 'Si'],
+          correct: 2
+        },
+        {
+          question: 'Which element is named after a planet?',
+          options: ['Helium', 'Uranium', 'Neon', 'Argon'],
+          correct: 1
+        },
+        {
+          question: 'What is the atomic number of Uranium?',
+          options: ['92', '94', '96', '98'],
+          correct: 0
+        },
+        {
+          question: 'Which element is used in light bulbs?',
+          options: ['Tungsten', 'Iron', 'Copper', 'Silver'],
+          correct: 0
+        },
+        {
+          question: 'What is the chemical symbol for Lead?',
+          options: ['Ld', 'Pb', 'Le', 'Pl'],
+          correct: 1
+        },
+        {
+          question: 'Which element is a lanthanide?',
+          options: ['Cerium', 'Uranium', 'Plutonium', 'Thorium'],
+          correct: 0
+        },
+        {
+          question: 'What is the atomic number of Gold?',
+          options: ['47', '79', '82', '92'],
+          correct: 1
+        },
+        {
+          question: 'Which element is an alkali metal?',
+          options: ['Magnesium', 'Calcium', 'Potassium', 'Beryllium'],
+          correct: 2
+        },
+        {
+          question: 'What is the chemical symbol for Platinum?',
+          options: ['Pl', 'Pt', 'Pm', 'Pu'],
+          correct: 1
+        },
+        {
+          question: 'Which element is used in nuclear reactors?',
+          options: ['Uranium', 'Lead', 'Gold', 'Silver'],
+          correct: 0
+        },
+        {
+          question: 'What is the atomic number of Silver?',
+          options: ['47', '48', '49', '50'],
+          correct: 0
+        },
+        {
+          question: 'Which element is a gas at room temperature?',
+          options: ['Bromine', 'Mercury', 'Oxygen', 'Iodine'],
+          correct: 2
+        },
+        {
+          question: 'What is the chemical symbol for Mercury?',
+          options: ['Me', 'Hg', 'Mc', 'Mr'],
+          correct: 1
+        },
+        {
+          question: 'Which element is named after a scientist?',
+          options: ['Einsteinium', 'Uranium', 'Neptunium', 'Plutonium'],
+          correct: 0
+        },
+        {
+          question: 'What is the atomic number of Chlorine?',
+          options: ['16', '17', '18', '19'],
+          correct: 1
+        },
+        {
+          question: 'Which element is used in batteries?',
+          options: ['Nickel', 'Iron', 'Copper', 'Zinc'],
+          correct: 0
+        },
+        {
+          question: 'What is the chemical symbol for Cobalt?',
+          options: ['Co', 'Cb', 'Ct', 'Cm'],
+          correct: 0
+        },
+        {
+          question: 'Which element is an actinide?',
+          options: ['Thorium', 'Cerium', 'Lanthanum', 'Neodymium'],
+          correct: 0
+        },
+        {
+          question: 'What is the atomic number of Neon?',
+          options: ['8', '9', '10', '11'],
+          correct: 2
+        },
+        {
+          question: 'Which element is used in solar panels?',
+          options: ['Silicon', 'Carbon', 'Oxygen', 'Nitrogen'],
+          correct: 0
+        },
+        {
+          question: 'What is the chemical symbol for Arsenic?',
+          options: ['Ar', 'As', 'An', 'Ac'],
+          correct: 1
+        },
+        {
+          question: 'Which element is a post-transition metal?',
+          options: ['Aluminum', 'Scandium', 'Titanium', 'Vanadium'],
+          correct: 0
+        },
+        {
+          question: 'What is the atomic number of Krypton?',
+          options: ['34', '35', '36', '37'],
+          correct: 2
+        },
+        {
+          question: 'Which element is used in fluorescent lights?',
+          options: ['Mercury', 'Lead', 'Zinc', 'Copper'],
+          correct: 0
+        },
+        {
+          question: 'What is the chemical symbol for Barium?',
+          options: ['Br', 'Ba', 'Bi', 'Bk'],
+          correct: 1
+        },
+        {
+          question: 'Which element is a noble gas?',
+          options: ['Xenon', 'Chlorine', 'Fluorine', 'Bromine'],
+          correct: 0
+        },
+        {
+          question: 'What is the atomic number of Zinc?',
+          options: ['28', '29', '30', '31'],
+          correct: 2
+        },
+        {
+          question: 'Which element is named after a country?',
+          options: ['Francium', 'Germanium', 'Polonium', 'All of the above'],
+          correct: 3
+        },
+        {
+          question: 'What is the chemical symbol for Strontium?',
+          options: ['Sr', 'St', 'Sn', 'Sb'],
+          correct: 0
+        }
+      ];
+
+      // Select 10 random questions
+      function getRandomQuestions() {
+        const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, 10);
+      }
+      
+      let questions = getRandomQuestions();
+      let currentQuestion = 0;
+      let score = 0;
+      let answered = false;
+      
+      const questionText = document.getElementById('question-text');
+      const optionsContainer = document.getElementById('options-container');
+      const quizResult = document.getElementById('quiz-result');
+      const scoreDisplay = document.getElementById('score-display');
+      const nextBtn = document.getElementById('next-question');
+      const restartBtn = document.getElementById('restart-quiz');
+      
+      function loadRandomQuestions() {
+        questions = getRandomQuestions();
+        currentQuestion = 0;
+        score = 0;
+        loadQuestion();
+      }
+      
+      function loadQuestion() {
+        if (currentQuestion >= questions.length) {
+          questionText.textContent = 'Quiz Complete!';
+          optionsContainer.innerHTML = '';
+          quizResult.textContent = `You scored ${score} out of ${questions.length}!`;
+          nextBtn.disabled = true;
+          return;
+        }
+        
+        const q = questions[currentQuestion];
+        questionText.textContent = q.question;
+        optionsContainer.innerHTML = '';
+        answered = false;
+        quizResult.textContent = '';
+        
+        q.options.forEach((option, index) => {
+          const btn = document.createElement('button');
+          btn.className = 'option-btn';
+          btn.textContent = option;
+          btn.addEventListener('click', () => checkAnswer(index));
+          optionsContainer.appendChild(btn);
+        });
+        
+        nextBtn.disabled = true;
+        scoreDisplay.textContent = `Score: ${score} / ${questions.length}`;
+      }
+      
+      function checkAnswer(selected) {
+        if (answered) return;
+        answered = true;
+        
+        const q = questions[currentQuestion];
+        const buttons = document.querySelectorAll('.option-btn');
+        
+        if (selected === q.correct) {
+          buttons[selected].classList.add('correct');
+          score++;
+          quizResult.textContent = '✅ Correct!';
+        } else {
+          buttons[selected].classList.add('wrong');
+          buttons[q.correct].classList.add('correct');
+          quizResult.textContent = '❌ Incorrect.';
+        }
+        
+        nextBtn.disabled = false;
+        scoreDisplay.textContent = `Score: ${score} / ${questions.length}`;
+      }
+      
+      nextBtn.addEventListener('click', () => {
+        currentQuestion++;
+        loadQuestion();
+      });
+      
+      restartBtn.addEventListener('click', () => {
+        loadRandomQuestions();
+      });
+      
+      // Initialize
+      loadRandomQuestions();
+      generatePeriodicTable();
+      
+      // Start with main theme
+      applyThemeForPage('main');
+    })();
+  </script>
+</body>
+</html>
